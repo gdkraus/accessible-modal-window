@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<title>The Incredible Accessible Modal Window</title>
+<script src="../../../jquery/jquery-1.6.4.min.js"></script>
+<script src="modal-window.js"></script>
+<style type="text/css">
+#modalOverlay {
+	width:100%;
+	height:100%;
+	z-index:2;
+	background-color:#000;
+	opacity:0.5;
+	position:fixed;
+	top:0;
+	left:0;
+	display:none;
+	margin:0;
+	padding:0;
+}
+
+#modal {
+	width:50%;
+	margin-left:auto;
+	margin-right:auto;
+	padding: 5px;
+	border: thin #000 solid;
+	background-color:#fff;
+	z-index:3;
+	position:absolute;
+	top:25%;
+	left:25%;
+	display:none;
+}
+#modal h1 {
+	text-align:center;
+}
+
+.modalCloseButton {
+	float:right;
+	position:absolute;
+	top:10px;
+	left:95%;
+}
+.modalCloseButton img {
+	border:0;
+}
+
+.screen-reader-offscreen {
+   position:absolute;
+   left:-999px;
+   width:1px;
+   height:1px;
+   top:auto;
+}
+
+</style>
+</head>
+
+<body>
+<div id="mainPage" aria-hidden="false">
+  <h1>The Incredible Accessible Modal Window</h1>
+  <p>This page demonstrates how to make a modal window as accessible as possible to assistive technology users. Modal windows are especially problematic for screen reader users. Often times the user is able to &quot;escape&quot; the window and interact with other parts of the page when they should not be able to. This is partially due to the way screen reader software interacts with the Web browser.</p>
+  <h2>The Accessible Modal Window in Action</h2>
+  <p>To see this in action, you just need to <a id="startModal" href="javascript:void(0)">view the modal window</a>. If the modal window works as planned, once the modal window is visible you should not be able to interact with other links on the main page like <a href="http://accessibility.ncsu.edu">going to our main accessibility page</a>. If you can interact with the page behind the modal window, guidance is given for how to get back to the modal window.</p>
+  <h2>Features</h2>
+  <p>This example implements the following features:</p>
+  <ol>
+    <li>the page is divided into two sections:
+      <ol>
+        <li>&lt;div id=&quot;mainPage&gt;&lt;/div&gt;</li>
+        <li>&lt;div id=&quot;modal&quot; role=&quot;alertdialog&quot;&gt;&lt;/div&gt;        </li>
+      </ol>
+    </li>
+    <li>&quot;alertdialog&quot; is used instead of the role of &quot;dialog&quot; because of a bug in JAWS and IE where text entered into form input elements does not get automatically read to the user. &quot;alertdialog&quot; does not exhibit this behavior. This bug has been reported to Freedom Scientific.</li>
+    <li>an overlay is placed over top of the mainPage so it is
+      <ol>
+        <li>visually grayed out in order to indicate you cannot interact with what is behind the window</li>
+        <li>not clickable with the mouse</li>
+      </ol>
+    </li>
+    <li>the mainPage is marked with aria-hidden=&quot;true&quot; to prevent screen readers from interacting with it once the modal window is open (note, only JAWS currently supports this attribute)</li>
+    <li>the modal window is marked with role=&quot;alertdialog&quot;</li>
+    <li>keyboard access is limited to only interacting with the modal window once it is visible
+      <ol>
+        <li>the tab
+          key loops through all of the keyboard focusable items within the modal window
+          <ol>
+            <li>this is determined programmatically through the DOM each time the tab key is pressed so you do not have to create an explicit list of focusable items within the modal window to keep track of</li>
+          </ol>
+        </li>
+        <li>the escape key is mapped to the function to close the modal window</li>
+        <li>the enter key is mapped to the submit function of the modal window</li>
+      </ol>
+    </li>
+    <li>the modal window is marked with an h1</li>
+    <li>there are offscreen instructions that describe the modal window and how to interact with it
+      <ol>
+        <li>the instructions are attached through the aria-labelledby attribute. aria-describedby works partially, except JAWS is too verbose with the aria-describedby attribute within a role=&quot;form&quot;. Also VoiceOver and ChromeVox do not support the aria-describeby attribute in this implementation</li>
+        <li>note, the maximum length of text in an aria-labelledby attribute for JAWS is around 240 characters. NVDA does not have this limitation.</li>
+      </ol>
+    </li>
+    <li>there is a shim in place for screen readers in WebKit browsers (VoiceOver and ChromeVox) support since these screen readers do not announce the aria-label or aria-labelledby attributes of an element with role=&quot;alertdialog&quot; when an item within the element receives focus. The shim changes the aria-labelledby attribute to an aria-describedby attribute and, when the modal window is displayed, it places the initial focus on the modal window itself instead of the first keyboard focusable item in the modal window.</li>
+  </ol>
+</div>
+<div id="modal" aria-hidden="true" aria-labelledby="modalTitle modalDescription" role="alertdialog" tabindex="-1">
+<!-- the modal window has tabindex="-1" as a shim to support VoiceOver and ChromeVox -->
+  <h1 id="modalTitle">Registration Form</h1>
+  <div id="modalDescription" class="screen-reader-offscreen">Beginning of dialog window. It begins with a heading 1 called &quot;Registration Form&quot;. Escape will cancel and close the window. This form does not collect any actual information.</div>
+  <form name="form1" method="post" action="">
+		<p>
+			<label for="firstName">First Name</label>
+			<input type="text" name="firstName" id="firstName">
+		</p>
+		<p>
+			<label for="lastName">Last Name</label>
+			<input type="text" name="lastName" id="lastName">
+		</p>
+		<p>
+			<label for="email">Email Address</label>
+			<input type="text" name="email" id="email">
+		</p>
+		<p>
+			<input type="button" name="button" id="enter" value="Submit">
+			<input type="button" name="cancelButton" id="cancelButton" value="Cancel">
+		</p>
+		<a id="modalCloseButton" class="modalCloseButton" href="javascript:void(0)" title="Close registration form"><img id="cancel" src="x.png" alt="close the registration form"></a>
+
+  </form>
+</div>
+<div id="modalOverlay" tabindex="-1"></div>
+
+</body>
+</html>
